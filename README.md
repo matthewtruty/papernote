@@ -2,7 +2,9 @@
 
 A quiet, local-first Markdown notebook for macOS and Windows. The desktop shell is Electron; the writing UI follows the redesign in `design/Papernote.dc.html`.
 
-Working on the code? See [CONTRIBUTING.md](CONTRIBUTING.md).
+Working on the code? See [CONTRIBUTING.md](CONTRIBUTING.md). All changes land through pull requests.
+
+Licensed under the [MIT License](LICENSE).
 
 ## Run
 

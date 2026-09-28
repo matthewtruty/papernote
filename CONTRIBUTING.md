@@ -17,7 +17,9 @@ cd papernote
 npm install
 ```
 
-The repo is public. Ask for write access if you cannot push.
+The repo is public. Fork it, or ask for write access if you will push feature branches.
+
+**`main` only accepts pull requests.** Do not push commits to `main`. Open a PR from a branch (or from a fork) and merge that.
 
 ## Everyday workflow
 
@@ -58,10 +60,17 @@ Do not commit `node_modules/`, `dist/`, `release/`, `.env` files, or built `.dmg
 
 ## Pull requests
 
+Every change, including from maintainers, goes through a pull request against `main`. Direct pushes and force-pushes to `main` are blocked.
+
 1. Keep the branch focused on one change.
 2. Make sure `npm test` passes.
 3. Open a PR against `main` with a short “why” and how you checked it (dev app, tests, or a DMG).
 4. If you changed UI, layout, or shortcuts, say what you clicked through.
+5. Wait for review if another person is available; otherwise a maintainer can merge.
+
+## License
+
+By contributing, you agree that your work is licensed under the [MIT License](LICENSE).
 
 ## Shipping a build
 

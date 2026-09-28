@@ -2,6 +2,7 @@
   "name": "papernote",
   "version": "2.0.0",
   "author": "Papernote",
+  "license": "MIT",
   "description": "A quiet, local-first writing app.",
   "main": "electron/main.js",
   "type": "module",
