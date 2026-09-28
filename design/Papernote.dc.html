@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inconsolata:wght@400;600&family=Red+Hat+Mono:ital,wght@0,400;0,600;1,400&family=Spline+Sans+Mono:ital,wght@0,400;0,600;1,400&family=Overpass+Mono:wght@400;600&family=Sometype+Mono:ital,wght@0,400;0,600;1,400&family=Figtree:ital,wght@0,400;0,600;1,400&family=Manrope:wght@400;600&family=Hanken+Grotesk:ital,wght@0,400;0,600;1,400&family=Instrument+Sans:ital,wght@0,400;0,600;1,400&family=Rubik:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#FBFBF9;}
+textarea{outline:none;}
+a{color:#0f8bbd;text-decoration:none;} a:hover{color:#0a6d96;}
+::selection{background:rgba(25,179,230,.22);}
+::placeholder{color:#c2c2bd;}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,6px);}to{opacity:1;transform:translate(-50%,0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.pn-live h1{font-size:1.5em;font-weight:700;margin:0 0 .6em;line-height:1.3;}
+.pn-live h2{font-size:1.25em;font-weight:600;margin:1.2em 0 .4em;}
+.pn-live p,.pn-live div{margin:0 0 1em;}
+.pn-live ul{margin:0 0 1em;padding-left:1.3em;}
+.pn-live li{margin:.15em 0;}
+.pn-live blockquote{margin:0 0 1em;padding:.1em 0 .1em 1em;border-left:2px solid #d8d8d2;color:#6e6e69;font-style:italic;}
+.pn-live s{color:#9a9a94;}
+</style>
+</helmet>
+<div style="position:relative;height:100vh;overflow:hidden;background:#FBFBF9;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;color:#1a1a1a;">
+  <div style="position:absolute;top:18px;left:18px;display:flex;gap:8px;z-index:5;opacity:{{ chromeOpacity }};transition:opacity .45s ease;">
+    <div style="width:12px;height:12px;border-radius:50%;background:#FF5F57;"></div>
+    <div style="width:12px;height:12px;border-radius:50%;background:#FEBC2E;"></div>
+    <div style="width:12px;height:12px;border-radius:50%;background:#28C840;"></div>
+  </div>
+  <div style="position:absolute;inset:0;display:flex;justify-content:center;overflow:auto;">
+    <div style="width:min({{ colWidth }}px,90%);display:flex;flex-direction:column;padding:96px 0 80px;">
+      <sc-if value="{{ isMd }}" hint-placeholder-val="{{ false }}">
+        <textarea ref="{{ taRef }}" value="{{ text }}" onChange="{{ onText }}" spellCheck="{{ false }}" placeholder="Start typing…" style="flex:1;width:100%;border:none;background:transparent;resize:none;caret-color:{{ caret }};color:#1f1f1e;font-family:{{ mdFamily }};font-size:{{ mdSize }};line-height:1.72;padding:0;"></textarea>
+      </sc-if>
+      <sc-if value="{{ isLive }}" hint-placeholder-val="{{ true }}">
+        <div ref="{{ liveRef }}" class="pn-live" contentEditable="{{ true }}" suppressContentEditableWarning="{{ true }}" onInput="{{ onLiveInput }}" spellCheck="{{ false }}" style="flex:1;font-family:{{ liveFamily }};font-size:{{ liveSize }};line-height:1.72;color:#1f1f1e;cursor:text;caret-color:{{ caret }};outline:none;"></div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:6;transform:translateY({{ barShift }});transition:transform .45s cubic-bezier(.4,0,.2,1);background:rgba(251,251,249,.92);backdrop-filter:blur(12px);border-top:1px solid #ECECE8;">
+    <div style="display:flex;align-items:center;gap:2px;padding:0 18px;height:44px;font-size:12.5px;color:#6e6e69;white-space:nowrap;overflow-x:auto;">
+      <span style="display:flex;background:#F0F0EC;border-radius:7px;padding:2px;margin-right:8px;">
+        <span onClick="{{ setLive }}" title="Parsed view — ⌘E" style="padding:4px 10px;border-radius:5px;cursor:pointer;background:{{ liveTabBg }};color:{{ liveTabColor }};box-shadow:{{ liveTabShadow }};">Live</span>
+        <span onClick="{{ setMd }}" title="Markdown source — ⌘E" style="padding:4px 10px;border-radius:5px;cursor:pointer;background:{{ mdTabBg }};color:{{ mdTabColor }};box-shadow:{{ mdTabShadow }};">Markdown</span>
+      </span>
+      <span onClick="{{ doHeading }}" title="Heading — ⌘⌥1" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">Heading</span>
+      <span onClick="{{ doList }}" title="List" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">List</span>
+      <span onClick="{{ doQuote }}" title="Blockquote" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">Quote</span>
+      <span style="width:1px;height:16px;background:#E3E3DE;margin:0 8px;"></span>
+      <span onClick="{{ doBold }}" title="Bold — ⌘B" style="padding:6px 9px;border-radius:6px;cursor:pointer;font-weight:700;" style-hover="color:#1a1a1a;background:#F0F0EC;">B</span>
+      <span onClick="{{ doItalic }}" title="Italic — ⌘I" style="padding:6px 10px;border-radius:6px;cursor:pointer;font-style:italic;font-family:Georgia,serif;" style-hover="color:#1a1a1a;background:#F0F0EC;">I</span>
+      <span onClick="{{ doStrike }}" title="Strikethrough" style="padding:6px 9px;border-radius:6px;cursor:pointer;text-decoration:line-through;" style-hover="color:#1a1a1a;background:#F0F0EC;">S</span>
+      <span onClick="{{ doLink }}" title="Link — ⌘K on selection" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">Link</span>
+      <span style="width:1px;height:16px;background:#E3E3DE;margin:0 8px;"></span>
+      <span onClick="{{ openSearch }}" title="Search — ⌘O" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">Search</span>
+      <span onClick="{{ toggleFile }}" title="File this note away" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">File It</span>
+      <span onClick="{{ togglePublish }}" title="Publish" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">Publish</span>
+      <span onClick="{{ toggleCopy }}" title="Copy note" style="padding:6px 9px;border-radius:6px;cursor:pointer;" style-hover="color:#1a1a1a;background:#F0F0EC;">Copy</span>
+      <span style="flex:1;"></span>
+      <input type="range" min="520" max="1200" step="20" value="{{ colWidth }}" onChange="{{ onWidth }}" title="Editor width" style="width:80px;accent-color:#8a8a84;cursor:pointer;margin-right:6px;">
+      <span onClick="{{ toggleFonts }}" title="Font for current mode" style="padding:6px 9px;border-radius:6px;cursor:pointer;font-family:{{ activeFamily }};font-size:11.5px;" style-hover="color:#1a1a1a;background:#F0F0EC;">{{ activeFontName }}</span>
+      <sc-if value="{{ showWordCount }}" hint-placeholder-val="{{ true }}">
+        <span style="padding:6px 9px;color:#9a9a94;font-variant-numeric:tabular-nums;">{{ wordCount }} words</span>
+      </sc-if>
+      <span onClick="{{ toggleZen }}" title="Zen mode — ⌘." style="padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px;" style-hover="color:#1a1a1a;background:#F0F0EC;">◐</span>
+    </div>
+  </div>
+
+  <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeAll }}" style="position:absolute;inset:0;z-index:10;background:rgba(30,30,28,.18);animation:fadeIn .15s ease;">
+      <div onClick="{{ stopClick }}" style="width:520px;margin:120px auto 0;background:#FDFDFB;border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.22),0 0 0 1px rgba(0,0,0,.05);overflow:hidden;">
+        <input ref="{{ searchRef }}" placeholder="Search notes…" style="width:100%;box-sizing:border-box;border:none;outline:none;background:transparent;padding:16px 20px;font-size:16px;font-family:inherit;color:#1a1a1a;border-bottom:1px solid #EFEFEA;">
+        <div style="padding:6px;">
+          <sc-for list="{{ searchResults }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:baseline;gap:12px;padding:10px 14px;border-radius:8px;cursor:pointer;" style-hover="background:#F2F2EE;">
+              <span style="font-size:13.5px;color:#1a1a1a;">{{ r.title }}</span>
+              <span style="flex:1;"></span>
+              <span style="font-size:11.5px;color:#a5a59f;">{{ r.meta }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:10px 20px;border-top:1px solid #EFEFEA;font-size:11px;color:#a5a59f;display:flex;gap:14px;"><span>↑↓ navigate</span><span>↩ open</span><span>esc close</span></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ fileOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:18px;bottom:56px;z-index:9;width:220px;background:#FDFDFB;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);padding:6px;animation:fadeIn .12s ease;">
+      <div style="padding:8px 12px 4px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#a5a59f;">File this note in</div>
+      <sc-for list="{{ folders }}" as="f" hint-placeholder-count="4">
+        <div onClick="{{ closeAll }}" style="display:flex;align-items:center;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:#333;" style-hover="background:#F2F2EE;">
+          <span>{{ f.name }}</span><span style="flex:1;"></span><span style="font-size:11px;color:#c0c0ba;">⌘{{ f.key }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ publishOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;right:120px;bottom:56px;z-index:9;width:260px;background:#FDFDFB;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);padding:16px;animation:fadeIn .12s ease;">
+      <div style="font-size:13.5px;font-weight:600;color:#1a1a1a;">Publish to web</div>
+      <div style="font-size:12px;color:#8a8a84;margin-top:4px;line-height:1.5;">Creates a public read-only page for this note.</div>
+      <div onClick="{{ closeAll }}" style="margin-top:12px;text-align:center;background:#1a1a1a;color:#FBFBF9;border-radius:7px;padding:8px 0;font-size:12.5px;cursor:pointer;" style-hover="background:#333;">Publish note</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ fontsOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;right:18px;bottom:56px;z-index:9;width:360px;max-height:min(560px,calc(100vh - 120px));overflow:auto;background:#FDFDFB;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);padding:6px;animation:fadeIn .12s ease;">
+      <div style="padding:8px 12px 4px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#a5a59f;">{{ fontMenuTitle }}</div>
+      <sc-for list="{{ fontRows }}" as="f" hint-placeholder-count="4">
+        <div onClick="{{ f.pick }}" style="padding:10px 12px;border-radius:6px;cursor:pointer;background:{{ f.bg }};" style-hover="background:#F2F2EE;">
+          <div style="display:flex;align-items:baseline;"><span style="font-size:11.5px;color:#8a8a84;">{{ f.name }}</span><span style="flex:1;"></span><span style="font-size:11px;color:#19b3e6;">{{ f.mark }}</span></div>
+          <div style="font-family:{{ f.family }};font-size:15px;color:#1a1a1a;margin-top:3px;">A quiet tool for loud thoughts.</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ copyOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:50%;transform:translateX(-50%);bottom:56px;z-index:9;width:230px;background:#FDFDFB;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);padding:6px;animation:fadeIn .12s ease;">
+      <div onClick="{{ copyMd }}" style="display:flex;align-items:center;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:#333;" style-hover="background:#F2F2EE;">
+        <span>Copy as Markdown</span><span style="flex:1;"></span><span style="font-size:11px;color:#c0c0ba;">.md</span>
+      </div>
+      <div onClick="{{ copyRich }}" style="display:flex;align-items:center;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:#333;" style-hover="background:#F2F2EE;">
+        <span>Copy as formatted text</span><span style="flex:1;"></span><span style="font-size:11px;color:#c0c0ba;">rich</span>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:8;background:rgba(26,26,26,.88);color:#FBFBF9;font-size:12px;padding:7px 14px;border-radius:100px;animation:toastIn .25s ease;pointer-events:none;">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;liveFont&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;Rubik&quot;, &quot;options&quot;: [&quot;Fira Mono&quot;, &quot;Space Mono&quot;, &quot;Inconsolata&quot;, &quot;Red Hat Mono&quot;, &quot;Spline Sans Mono&quot;, &quot;Overpass Mono&quot;, &quot;Sometype Mono&quot;, &quot;Figtree&quot;, &quot;Manrope&quot;, &quot;Hanken Grotesk&quot;, &quot;Instrument Sans&quot;, &quot;Rubik&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Fonts&quot;},
+  &quot;markdownFont&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;Overpass Mono&quot;, &quot;options&quot;: [&quot;Fira Mono&quot;, &quot;Space Mono&quot;, &quot;Inconsolata&quot;, &quot;Red Hat Mono&quot;, &quot;Spline Sans Mono&quot;, &quot;Overpass Mono&quot;, &quot;Sometype Mono&quot;, &quot;Figtree&quot;, &quot;Manrope&quot;, &quot;Hanken Grotesk&quot;, &quot;Instrument Sans&quot;, &quot;Rubik&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Fonts&quot;},
+  &quot;caretColor&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#19b3e6&quot;, &quot;options&quot;: [&quot;#19b3e6&quot;, &quot;#e6641b&quot;, &quot;#8a5cf6&quot;, &quot;#1a1a1a&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Editor&quot;},
+  &quot;showWordCount&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Bottom bar&quot;}
+}">
+class Component extends DCLogic {
+  state = {
+    text: "# The shape of a quiet tool\n\nPapernote should disappear while you write. One column of text, a caret, and nothing else asking for attention.\n\n- No toolbar overhead\n- Formatting lives at the bottom, out of the eye line\n- Zen mode (\u2318.) removes even that\n\n**Bold**, *italic*, and ~~strikethrough~~ stay as plain markdown. What you see is what you typed.\n\n> The tool should be quieter than the thought.",
+    zen: false, searchOpen: false, fileOpen: false, publishOpen: false, fontsOpen: false,
+    mode: "live", liveFontIndex: null, mdFontIndex: null, toast: null, colWidth: 860, copyOpen: false
+  };
+  fonts = [
+    { name: "Fira Mono", family: "'Fira Mono', monospace", size: "16px", group: "Mono" },
+    { name: "Space Mono", family: "'Space Mono', monospace", size: "15.5px", group: "Mono" },
+    { name: "Inconsolata", family: "'Inconsolata', monospace", size: "17px", group: "Mono" },
+    { name: "Red Hat Mono", family: "'Red Hat Mono', monospace", size: "15.5px", group: "Mono" },
+    { name: "Spline Sans Mono", family: "'Spline Sans Mono', monospace", size: "16px", group: "Mono" },
+    { name: "Overpass Mono", family: "'Overpass Mono', monospace", size: "15.5px", group: "Mono" },
+    { name: "Sometype Mono", family: "'Sometype Mono', monospace", size: "16px", group: "Mono" },
+    { name: "Figtree", family: "'Figtree', sans-serif", size: "17px", group: "Sans" },
+    { name: "Manrope", family: "'Manrope', sans-serif", size: "16.5px", group: "Sans" },
+    { name: "Hanken Grotesk", family: "'Hanken Grotesk', sans-serif", size: "17px", group: "Sans" },
+    { name: "Instrument Sans", family: "'Instrument Sans', sans-serif", size: "17px", group: "Sans" },
+    { name: "Rubik", family: "'Rubik', sans-serif", size: "16.5px", group: "Sans" }
+  ];
+  ta = React.createRef();
+  search = React.createRef();
+  live = React.createRef();
+  componentDidMount() {
+    this.onKey = (e) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key === ".") { e.preventDefault(); this.toggleZen(); return; }
+      if (meta && (e.key === "o" || e.key === "O")) { e.preventDefault(); this.openSearch(); return; }
+      if (meta && (e.key === "e" || e.key === "E")) { e.preventDefault(); this.setMode(this.state.mode === "live" ? "md" : "live"); return; }
+      if (meta && (e.key === "b" || e.key === "B")) { e.preventDefault(); this.wrap("**", "**"); return; }
+      if (meta && (e.key === "i" || e.key === "I")) { e.preventDefault(); this.wrap("*", "*"); return; }
+      if (e.key === "Escape") {
+        if (this.state.searchOpen || this.state.fileOpen || this.state.publishOpen || this.state.fontsOpen || this.state.copyOpen) this.setState({ searchOpen: false, fileOpen: false, publishOpen: false, fontsOpen: false, copyOpen: false });
+        else if (this.state.zen) this.toggleZen();
+      }
+    };
+    document.addEventListener("keydown", this.onKey);
+    setTimeout(() => this.renderLive(), 50);
+  }
+  renderLive() {
+    const el = this.live.current; if (!el) return;
+    el.innerHTML = this.toHtml() || "<p><br></p>";
+  }
+  domToMd(root) {
+    const inline = (node) => {
+      let s = "";
+      node.childNodes.forEach(n => {
+        if (n.nodeType === 3) { s += n.textContent; return; }
+        if (n.nodeName === "BR") return;
+        const inner = inline(n);
+        if (n.nodeName === "STRONG" || n.nodeName === "B") s += "**" + inner + "**";
+        else if (n.nodeName === "EM" || n.nodeName === "I") s += "*" + inner + "*";
+        else if (n.nodeName === "S" || n.nodeName === "STRIKE" || n.nodeName === "DEL") s += "~~" + inner + "~~";
+        else if (n.nodeName === "A") s += "[" + inner + "](" + (n.getAttribute("href") || "") + ")";
+        else s += inner;
+      });
+      return s;
+    };
+    const lines = [];
+    root.childNodes.forEach(n => {
+      if (n.nodeType === 3) { if (n.textContent.trim()) lines.push(n.textContent); return; }
+      const tag = n.nodeName;
+      if (tag === "H1") lines.push("# " + inline(n));
+      else if (tag === "H2") lines.push("## " + inline(n));
+      else if (tag === "BLOCKQUOTE") lines.push("> " + inline(n));
+      else if (tag === "UL" || tag === "OL") { const items = []; n.querySelectorAll("li").forEach(li => items.push("- " + inline(li))); lines.push(items.join("\n")); }
+      else lines.push(inline(n));
+    });
+    return lines.join("\n\n").replace(/\n{3,}/g, "\n\n");
+  }
+  caretOffset(el) {
+    const sel = window.getSelection(); if (!sel.rangeCount) return null;
+    const r = sel.getRangeAt(0);
+    if (!el.contains(r.endContainer)) return null;
+    const pre = r.cloneRange(); pre.selectNodeContents(el); pre.setEnd(r.endContainer, r.endOffset);
+    return pre.toString().length;
+  }
+  setCaret(el, off) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let n, acc = 0;
+    while ((n = walker.nextNode())) {
+      if (acc + n.textContent.length >= off) {
+        const sel = window.getSelection(); const r = document.createRange();
+        r.setStart(n, Math.max(0, off - acc)); r.collapse(true);
+        sel.removeAllRanges(); sel.addRange(r); return;
+      }
+      acc += n.textContent.length;
+    }
+    const sel = window.getSelection(); sel.selectAllChildren(el); sel.collapseToEnd();
+  }
+  onLiveInput = () => {
+    const el = this.live.current; if (!el) return;
+    const raw = el.innerText || "";
+    const hasTokens = /(^|\n)#{1,2} \S/.test(raw) || /(^|\n)- \S/.test(raw) || /(^|\n)> \S/.test(raw)
+      || /\*\*[^*\n]+\*\*/.test(raw) || /~~[^~\n]+~~/.test(raw)
+      || /(^|[^*])\*(\S(?:[^*\n]*\S)?)\*([^*]|$)/.test(raw) || /\[[^\]\n]+\]\([^)\n]+\)/.test(raw);
+    const md = this.domToMd(el);
+    if (hasTokens) {
+      const off = this.caretOffset(el);
+      const oldLen = el.textContent.length;
+      this.setState({ text: md }, () => {
+        this.renderLive();
+        const newLen = el.textContent.length;
+        if (off != null) this.setCaret(el, Math.max(0, off - (oldLen - newLen)));
+      });
+    } else this.setState({ text: md });
+  };
+  execLive(cmd, arg) {
+    const el = this.live.current; if (!el) return;
+    el.focus();
+    document.execCommand(cmd, false, arg || null);
+    this.setState({ text: this.domToMd(el) });
+  }
+  componentWillUnmount() { document.removeEventListener("keydown", this.onKey); }
+  fontIdx(mode) {
+    const stateIdx = mode === "md" ? this.state.mdFontIndex : this.state.liveFontIndex;
+    if (stateIdx !== null) return stateIdx;
+    const want = mode === "md" ? (this.props.markdownFont ?? "IBM Plex Mono") : (this.props.liveFont ?? "Source Serif 4");
+    const i = this.fonts.findIndex(f => f.name === want);
+    return i >= 0 ? i : 0;
+  }
+  setMode = (mode) => {
+    this.setState({ mode, fontsOpen: false }, () => {
+      if (mode === "md" && this.ta.current) this.ta.current.focus();
+      if (mode === "live") setTimeout(() => this.renderLive(), 30);
+    });
+  };
+  inline(text, key) {
+    const out = []; let rest = text; let k = 0;
+    const re = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(~~([^~]+)~~)|(\[([^\]]+)\]\(([^)]+)\))/;
+    while (rest) {
+      const m = rest.match(re);
+      if (!m) { out.push(rest); break; }
+      if (m.index > 0) out.push(rest.slice(0, m.index));
+      k++;
+      if (m[1]) out.push(React.createElement("strong", { key: key + "-" + k }, m[2]));
+      else if (m[3]) out.push(React.createElement("em", { key: key + "-" + k }, m[4]));
+      else if (m[5]) out.push(React.createElement("s", { key: key + "-" + k, style: { color: "#9a9a94" } }, m[6]));
+      else if (m[7]) out.push(React.createElement("a", { key: key + "-" + k, href: "#", onClick: (e) => e.preventDefault() }, m[8]));
+      rest = rest.slice(m.index + m[0].length);
+    }
+    return out;
+  }
+  inlineHtml(t) {
+    return t.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(\S(?:[^*\n]*\S)?)\*/g, "<em>$1</em>")
+      .replace(/~~([^~]+)~~/g, "<s>$1</s>")
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  }
+  toHtml() {
+    const lines = this.state.text.split("\n");
+    const out = []; let list = false;
+    const closeList = () => { if (list) { out.push("</ul>"); list = false; } };
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t) { closeList(); continue; }
+      if (t.startsWith("- ")) { if (!list) { out.push("<ul>"); list = true; } out.push("<li>" + this.inlineHtml(t.slice(2)) + "</li>"); continue; }
+      closeList();
+      if (t.startsWith("## ")) out.push("<h2>" + this.inlineHtml(t.slice(3)) + "</h2>");
+      else if (t.startsWith("# ")) out.push("<h1>" + this.inlineHtml(t.slice(2)) + "</h1>");
+      else if (t.startsWith("> ")) out.push("<blockquote>" + this.inlineHtml(t.slice(2)) + "</blockquote>");
+      else out.push("<p>" + this.inlineHtml(t) + "</p>");
+    }
+    closeList();
+    return out.join("\n");
+  }
+  plainText() {
+    return this.state.text
+      .replace(/^#{1,6} /gm, "").replace(/^> /gm, "").replace(/^- /gm, "\u2022 ")
+      .replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1")
+      .replace(/~~([^~]+)~~/g, "$1").replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1");
+  }
+  copyMd = async () => {
+    try { await navigator.clipboard.writeText(this.state.text); this.flash("Markdown copied"); }
+    catch (e) { this.flash("Copy blocked by browser"); }
+    this.setState({ copyOpen: false });
+  };
+  copyRich = async () => {
+    try {
+      const html = this.toHtml();
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([this.plainText()], { type: "text/plain" })
+      })]);
+      this.flash("Formatted text copied");
+    } catch (e) {
+      try { await navigator.clipboard.writeText(this.plainText()); this.flash("Copied as plain text"); }
+      catch (e2) { this.flash("Copy blocked by browser"); }
+    }
+    this.setState({ copyOpen: false });
+  };
+  parseLive() {
+    const lines = this.state.text.split("\n");
+    const blocks = []; let list = null; let i = 0;
+    const flush = () => { if (list) { blocks.push(React.createElement("ul", { key: "ul" + i, style: { margin: "0 0 1em", paddingLeft: "1.3em" } }, list)); list = null; } };
+    for (const line of lines) {
+      i++;
+      const t = line.trim();
+      if (!t) { flush(); continue; }
+      if (t.startsWith("- ")) {
+        (list = list || []).push(React.createElement("li", { key: "li" + i, style: { margin: "0.15em 0" } }, this.inline(t.slice(2), "l" + i)));
+        continue;
+      }
+      flush();
+      if (t.startsWith("## ")) blocks.push(React.createElement("h2", { key: i, style: { fontSize: "1.25em", fontWeight: 600, margin: "1.2em 0 0.4em" } }, this.inline(t.slice(3), "h" + i)));
+      else if (t.startsWith("# ")) blocks.push(React.createElement("h1", { key: i, style: { fontSize: "1.5em", fontWeight: 700, margin: "0 0 0.6em", lineHeight: 1.3 } }, this.inline(t.slice(2), "h" + i)));
+      else if (t.startsWith("> ")) blocks.push(React.createElement("blockquote", { key: i, style: { margin: "0 0 1em", padding: "0.1em 0 0.1em 1em", borderLeft: "2px solid #d8d8d2", color: "#6e6e69", fontStyle: "italic" } }, this.inline(t.slice(2), "q" + i)));
+      else blocks.push(React.createElement("p", { key: i, style: { margin: "0 0 1em" } }, this.inline(t, "p" + i)));
+    }
+    flush();
+    return blocks;
+  }
+  flash(msg) {
+    clearTimeout(this.toastT);
+    this.setState({ toast: msg });
+    this.toastT = setTimeout(() => this.setState({ toast: null }), 1800);
+  }
+  toggleZen = () => {
+    const zen = !this.state.zen;
+    this.setState({ zen, mode: zen ? "live" : this.state.mode, searchOpen: false, fileOpen: false, publishOpen: false, fontsOpen: false });
+    this.flash(zen ? "Zen \u2014 \u2318. to come back" : "Zen off");
+    if (this.ta.current) this.ta.current.focus();
+  };
+  openSearch = () => {
+    this.setState({ searchOpen: true, fileOpen: false, publishOpen: false, fontsOpen: false });
+    setTimeout(() => this.search.current && this.search.current.focus(), 30);
+  };
+  wrap(before, after) {
+    if (this.state.mode !== "md") {
+      const cmd = before === "**" ? "bold" : before === "*" ? "italic" : before === "~~" ? "strikeThrough" : "createLink";
+      this.execLive(cmd, cmd === "createLink" ? "https://" : null);
+      return;
+    }
+    const ta = this.ta.current; if (!ta) return;
+    const { selectionStart: s, selectionEnd: e } = ta;
+    const t = this.state.text;
+    const next = t.slice(0, s) + before + t.slice(s, e) + after + t.slice(e);
+    this.setState({ text: next }, () => {
+      ta.focus(); ta.setSelectionRange(s + before.length, e + before.length);
+    });
+  }
+  prefix(p) {
+    if (this.state.mode !== "md") {
+      if (p === "- ") this.execLive("insertUnorderedList");
+      else if (p === "> ") this.execLive("formatBlock", "blockquote");
+      else this.execLive("formatBlock", "h1");
+      return;
+    }
+    const ta = this.ta.current; if (!ta) return;
+    const t = this.state.text;
+    const s = ta.selectionStart;
+    const ls = t.lastIndexOf("\n", s - 1) + 1;
+    const next = t.slice(0, ls) + p + t.slice(ls);
+    this.setState({ text: next }, () => { ta.focus(); ta.setSelectionRange(s + p.length, s + p.length); });
+  }
+  renderVals() {
+    const st = this.state;
+    const isMd = st.mode === "md";
+    const liveFi = this.fontIdx("live"), mdFi = this.fontIdx("md");
+    const liveFont = this.fonts[liveFi], mdFont = this.fonts[mdFi];
+    const fi = isMd ? mdFi : liveFi;
+    const activeFont = isMd ? mdFont : liveFont;
+    const words = st.text.trim() ? st.text.trim().split(/\s+/).length : 0;
+    const tabOn = { bg: "#FDFDFB", color: "#1a1a1a", shadow: "0 1px 2px rgba(0,0,0,.08)" };
+    const tabOff = { bg: "transparent", color: "#8a8a84", shadow: "none" };
+    const lt = isMd ? tabOff : tabOn, mt = isMd ? tabOn : tabOff;
+    return {
+      text: st.text,
+      onText: (e) => this.setState({ text: e.target.value }),
+      taRef: this.ta, searchRef: this.search,
+      caret: this.props.caretColor ?? "#19b3e6",
+      colWidth: st.colWidth,
+      onWidth: (e) => this.setState({ colWidth: +e.target.value }),
+      isMd: isMd, isLive: !isMd,
+      mdFamily: mdFont.family, mdSize: mdFont.size,
+      liveFamily: liveFont.family, liveSize: liveFont.size,
+      activeFamily: activeFont.family, activeFontName: activeFont.name,
+      fontMenuTitle: isMd ? "Markdown mode font" : "Live mode font",
+      liveRef: this.live, onLiveInput: this.onLiveInput,
+      setLive: () => this.setMode("live"), setMd: () => this.setMode("md"),
+      liveTabBg: lt.bg, liveTabColor: lt.color, liveTabShadow: lt.shadow,
+      mdTabBg: mt.bg, mdTabColor: mt.color, mdTabShadow: mt.shadow,
+      chromeOpacity: st.zen ? 0 : 1,
+      barShift: st.zen ? "56px" : "0px",
+      wordCount: words,
+      showWordCount: this.props.showWordCount ?? true,
+      zen: st.zen, searchOpen: st.searchOpen, fileOpen: st.fileOpen, publishOpen: st.publishOpen, fontsOpen: st.fontsOpen,
+      toast: st.toast,
+      toggleZen: this.toggleZen,
+      openSearch: this.openSearch,
+      toggleFile: () => this.setState({ fileOpen: !st.fileOpen, publishOpen: false, fontsOpen: false }),
+      togglePublish: () => this.setState({ publishOpen: !st.publishOpen, fileOpen: false, fontsOpen: false, copyOpen: false }),
+      copyOpen: st.copyOpen,
+      toggleCopy: () => this.setState({ copyOpen: !st.copyOpen, fileOpen: false, publishOpen: false, fontsOpen: false }),
+      copyMd: this.copyMd, copyRich: this.copyRich,
+      toggleFonts: () => this.setState({ fontsOpen: !st.fontsOpen, fileOpen: false, publishOpen: false }),
+      closeAll: () => this.setState({ searchOpen: false, fileOpen: false, publishOpen: false, fontsOpen: false, copyOpen: false }),
+      stopClick: (e) => e.stopPropagation(),
+      doBold: () => this.wrap("**", "**"),
+      doItalic: () => this.wrap("*", "*"),
+      doStrike: () => this.wrap("~~", "~~"),
+      doLink: () => this.wrap("[", "](url)"),
+      doHeading: () => this.prefix("# "),
+      doList: () => this.prefix("- "),
+      doQuote: () => this.prefix("> "),
+      searchResults: [
+        { title: "The shape of a quiet tool", meta: "Scratchpad \u00b7 now" },
+        { title: "Reading notes \u2014 Mar", meta: "Essays \u00b7 2d" },
+        { title: "Letter to Sam (draft)", meta: "Inbox \u00b7 1w" },
+        { title: "Q3 publishing checklist", meta: "Work \u00b7 2w" }
+      ],
+      folders: [
+        { name: "Inbox", key: "1" }, { name: "Essays", key: "2" },
+        { name: "Work", key: "3" }, { name: "Archive", key: "4" }
+      ],
+      fontRows: this.fonts.map((f, i) => ({
+        name: f.name + "  \u00b7  " + f.group, family: f.family,
+        bg: i === fi ? "#F2F2EE" : "transparent",
+        mark: i === fi ? "\u2713" : "",
+        pick: () => this.setState(isMd ? { mdFontIndex: i, fontsOpen: false } : { liveFontIndex: i, fontsOpen: false }, () => { if (isMd && this.ta.current) this.ta.current.focus(); })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

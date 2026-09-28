@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Papernote — Redesign Spec</title>
+    <style>
+      @page { size: letter; margin: 0.5in; }
+      * { box-sizing: border-box; }
+      body { margin: 0; color: #1f1f1e; background: #fbfbf9; font: 10.75px/1.4 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; }
+      main { max-width: 8.5in; margin: 0 auto; padding: 8px 4px 0; }
+      header { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #d9d9d4; }
+      h1 { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.04em; }
+      header p { margin: 0; color: #6e6e69; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; padding-top: 16px; }
+      section { break-inside: avoid; }
+      h2 { margin: 0 0 6px; color: #6e6e69; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; }
+      p, ul { margin: 0 0 6px; }
+      ul { padding-left: 16px; }
+      li { margin-bottom: 3px; }
+      code { padding: 1px 3px; border-radius: 3px; background: #eeeeea; font-size: 10px; }
+      .swatches { display: flex; gap: 8px; margin-top: 8px; }
+      .swatch { width: 56px; }
+      .chip { height: 22px; border: 1px solid #d6d6d1; border-radius: 4px; }
+      .swatch small { display: block; margin-top: 3px; color: #6e6e69; font-size: 8px; }
+      footer { margin-top: 16px; padding-top: 8px; border-top: 1px solid #d9d9d4; color: #6e6e69; font-size: 9px; }
+      @media print { body { background: white; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Papernote</h1>
+        <p>Desktop redesign specification · printable one-pager</p>
+      </header>
+      <div class="grid">
+        <section>
+          <h2>Layout</h2>
+          <ul>
+            <li>No top chrome. Native traffic lights only; they fade out in Zen.</li>
+            <li>One centered text column, 520–1200 px via the bottom-bar slider.</li>
+            <li>Default width 860 px. Paper background <code>#FBFBF9</code>.</li>
+            <li>One 44 px bottom bar, flush to the window edge, translucent and blurred. It holds every control.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Modes</h2>
+          <p><strong>Live</strong> (default): markdown is rendered and stays directly editable. Typing <code># </code>, <code>- </code>, <code>&gt; </code>, <code>**bold**</code>, <code>*italic*</code>, <code>~~strike~~</code>, or <code>[link](url)</code> formats in place.</p>
+          <p><strong>Markdown</strong>: raw source in a plain textarea. Toggle with the segmented control or <code>⌘E</code>. Each mode keeps its own font.</p>
+        </section>
+        <section>
+          <h2>Zen</h2>
+          <ul>
+            <li><code>⌘.</code> toggles. <code>Esc</code> also exits.</li>
+            <li>Hides the bottom bar and traffic lights; forces Live mode.</li>
+            <li>Transient pill toast confirms: “Zen — ⌘. to come back”.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Bottom bar · left to right</h2>
+          <p>Live / Markdown · Heading · List · Quote · B · I · S · Link · Search · File It · Publish · Copy · width slider · font name · word count · ◐</p>
+          <p>In Live, format buttons apply rich formatting. In Markdown they insert syntax.</p>
+        </section>
+        <section>
+          <h2>Shortcuts</h2>
+          <p><code>⌘.</code> Zen · <code>⌘E</code> mode · <code>⌘O</code> search · <code>⌘B</code>/<code>⌘I</code> bold/italic · <code>⌘K</code> link · <code>⌘1–4</code> file · <code>Esc</code> close/exit</p>
+          <p>On Windows, use Ctrl in place of ⌘.</p>
+        </section>
+        <section>
+          <h2>File It · Search · Publish · Copy</h2>
+          <p>File It areas: Thoughts, Notes, Archive (<code>⌘1–3</code>). Add more areas from the popover.</p>
+          <p>Search is an overlay of recent notes. Publish writes a local read-only HTML page. Copy offers Markdown or formatted rich text.</p>
+        </section>
+        <section>
+          <h2>Fonts · 12, no serifs</h2>
+          <p><strong>Mono:</strong> Fira Mono, Space Mono, Inconsolata, Red Hat Mono, Spline Sans Mono, Overpass Mono, Sometype Mono.</p>
+          <p><strong>Sans:</strong> Figtree, Manrope, Hanken Grotesk, Instrument Sans, Rubik.</p>
+          <p>Defaults: Rubik (Live) · Overpass Mono (Markdown). The font menu previews each face with “A quiet tool for loud thoughts.”</p>
+        </section>
+        <section>
+          <h2>Color</h2>
+          <div class="swatches">
+            <div class="swatch"><div class="chip" style="background:#fbfbf9"></div><small>Paper<br>#FBFBF9</small></div>
+            <div class="swatch"><div class="chip" style="background:#1f1f1e"></div><small>Ink<br>#1F1F1E</small></div>
+            <div class="swatch"><div class="chip" style="background:#6e6e69"></div><small>UI<br>#6E6E69</small></div>
+            <div class="swatch"><div class="chip" style="background:#000"></div><small>Caret<br>#000000</small></div>
+          </div>
+        </section>
+      </div>
+      <footer>Print this page. Papernote is intentionally quiet: writing first, controls nearby, everything local.</footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dist-electron/
+release/
+*.log
+.DS_Store
+.env*
+/.build
+/Packages
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+/Papernote.app
+/*.dmg
+/*.zip
