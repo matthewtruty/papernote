@@ -17,7 +17,7 @@ cd papernote
 npm install
 ```
 
-Ask for write access if you cannot push. The repo is private.
+The repo is public. Ask for write access if you cannot push.
 
 ## Everyday workflow
 
